@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mappers.CargoMapper">
+
+	<!-- 将项目中的字段与数据库中的字段搭桥梁 -->
+	<resultMap type="per.cr.entity.Cargo" id="cargoMap">
+		<id property="cid" column="cid" />
+		<result property="name" column="cname" />
+		<result property="id" column="cargo_id" />
+		<result property="price" column="price" />
+		<result property="num" column="cnum" />
+		<result property="store_id" column="store_id" />
+	</resultMap>
+
+	<resultMap type="per.cr.entity.Json" id="jsonMap">
+		<result property="text" column="store_id" />
+		<result property="desc" column="sname" />
+	</resultMap>
+
+	<!-- 查询仓库ID -->
+	<select id="findStoreIds" resultMap="jsonMap">
+		SELECT store_id,sname FROM
+		store
+	</select>
+
+
+	<!-- 增加 -->
+	<insert id="add" parameterType="per.cr.entity.Cargo">
+		insert into cargo
+		(cid,cname,cargo_id,price,cnum,store_id)
+		values
+		(0,
+		#{name},#{id},#{price},#{num},#{store_id})
+	</insert>
+
+	<!-- 删除 -->
+	<delete id="deleteById" parameterType="int">
+		DELETE FROM cargo
+		WHERE
+		cid=#{id}
+	</delete>
+
+	<!-- 查找 所有 -->
+	<select id="findAll" resultMap="cargoMap">
+		SELECT * FROM
+		cargo
+	</select>
+
+	<!-- 通过系统id查找 -->
+	<select id="findById" parameterType="int" resultMap="cargoMap">
+		SELECT *
+		FROM cargo WHERE cid = #{PID}
+	</select>
+	<!-- 通过货物编号 -->
+	<select id="findByTid" parameterType="string" resultMap="cargoMap">
+		SELECT *
+		FROM cargo WHERE cargo_id = #{PID}
+	</select>
+	<!-- 条件查询 -->
+	<select id="search" parameterType="hashmap" resultMap="cargoMap">
+		SELECT *
+		FROM
+		cargo WHERE #{ftype} = #{fcontent}
+	</select>
+
+
+
+	<!-- 更新 -->
+	<update id="update" parameterType="per.cr.entity.Cargo">
+		UPDATE cargo
+		<set>
+			<if test="name != null">cname=#{name, jdbcType=VARCHAR},</if>
+			<if test="id != null">cargo_id=#{id, jdbcType=VARCHAR},</if>
+			<if test="price != null">price=#{price, jdbcType=VARCHAR},</if>
+			<if test="num != null">cnum=#{num, jdbcType=VARCHAR},</if>
+			<if test="store_id != null">store_id=#{store_id, jdbcType=VARCHAR},</if>
+		</set>
+		<where> cargo_id=#{id} </where>
+	</update>
+	<update id="updateState" parameterType="map">
+		update productor
+		<set>
+			state=#{state,jdbcType=VARCHAR}
+			<where>
+				id=#{id}
+			</where>
+		</set>
+	</update>
+
+	<!-- 分页 -->
+	<select id="findByPage" parameterType="map" resultMap="cargoMap">
+		select *
+		from cargo limit #{start},#{end}
+	</select>
+</mapper>

@@ -1,0 +1,160 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mappers.ManifestMapper">
+
+	<!-- 将项目中的字段与数据库中的字段搭桥梁 -->
+	<resultMap type="per.cr.entity.Manifest" id="manifestMap">
+		<id property="mid" column="mid" />
+		<result property="type" column="type" />
+		<result property="id" column="man_id" />
+		<result property="cargo_id" column="cargo_id" />
+		<result property="num" column="mnum" />
+		<result property="operator" column="operator" />
+		<result property="time" column="mtime" />
+		<result property="store_id" column="store_id" />
+	</resultMap>
+
+	<resultMap type="per.cr.entity.Cargo" id="cargoMap">
+		<id property="cid" column="cid" />
+		<result property="name" column="cname" />
+		<result property="id" column="cargo_id" />
+		<result property="price" column="price" />
+		<result property="num" column="cnum" />
+		<result property="store_id" column="store_id" />
+	</resultMap>
+
+	<resultMap type="per.cr.entity.Json" id="storeMap">
+		<result property="text" column="store_id" />
+		<result property="desc" column="sname" />
+	</resultMap>
+
+	<!-- 查询仓库ID -->
+	<select id="findStoreIds" resultMap="storeMap">
+		SELECT store_id,sname FROM
+		store
+	</select>
+	<!-- 根据货单提供的货物ID和仓库编号查询唯一的货物 -->
+	<select id="findStoreId" parameterType="string" resultMap="storeMap">
+		select s.store_id ,st.sname from (select store_id from cargo where
+		cargo_id=#{cargoid}) as s left join store as st
+		on st.store_id =
+		s.store_id
+	</select>
+
+
+
+	<resultMap type="per.cr.entity.Json" id="operatorMap">
+		<result property="text" column="operator_id" />
+		<result property="desc" column="oname" />
+	</resultMap>
+	<!-- 根据货单提供的员工id查询员工ID -->
+	<select id="findOperatorIds" resultMap="operatorMap">
+		SELECT operator_id,oname
+		FROM
+		operator
+	</select>
+
+	<resultMap type="per.cr.entity.Json" id="cargosMap">
+		<result property="text" column="cargo_id" />
+		<result property="desc" column="cname" />
+	</resultMap>
+	<!-- 根据货单提供的货物id查询货物ID -->
+	<select id="findCargoIds" resultMap="cargosMap">
+		SELECT cargo_id,cname FROM
+		cargo
+	</select>
+	<!-- 增加货单 -->
+	<insert id="add" parameterType="per.cr.entity.Manifest">
+		insert into manifest
+		(mid,type,man_id,cargo_id,mnum,operator,mtime,store_id)
+		values
+		(0,
+		#{type},#{id},#{cargo_id},#{num},#{operator},#{time},#{store_id})
+	</insert>
+
+	<!-- 通过系统id删除 -->
+	<delete id="deleteById" parameterType="int">
+		DELETE FROM manifest
+		WHERE
+		mid=#{id}
+	</delete>
+
+	<!-- 查找 所有 -->
+	<select id="findAll" resultMap="manifestMap">
+		SELECT * FROM
+		manifest
+	</select>
+
+	<!-- 通过系统id查找 -->
+	<select id="findById" parameterType="int" resultMap="manifestMap">
+		SELECT *
+		FROM manifest WHERE mid = #{PID}
+	</select>
+	
+		<select id="findByTid" parameterType="String" resultMap="manifestMap">
+		SELECT *
+		FROM manifest WHERE man_id = #{PID}
+	</select>
+	<!-- 根据货单获取货物信息 -->
+	<select id="getCargos" parameterType="String" resultMap="cargoMap">
+		SELECT *
+		FROM cargo WHERE cargo_id = #{cargo_id}
+	</select>
+
+	<select id="getCargo" parameterType="map" resultMap="cargoMap">
+		SELECT *
+		FROM cargo WHERE cargo_id = #{cargo_id} and store_id=#{store_id}
+	</select>
+
+	<!-- 根据货单增加货物信息 -->
+	<insert id="addCargo" parameterType="per.cr.entity.Cargo">
+		insert into cargo
+		(cid,cname,cargo_id,price,cnum,store_id)
+		values
+		(0,
+		#{name},#{id},#{price},#{num},#{store_id})
+	</insert>
+
+
+	<select id="search" parameterType="hashmap" resultMap="manifestMap">
+		SELECT *
+		FROM
+		manifest WHERE #{ftype} = #{fcontent}
+	</select>
+
+
+	<!-- 更新货单 -->
+	<update id="update" parameterType="per.cr.entity.Manifest">
+		UPDATE manifest
+		<set>
+			man_id=#{id, jdbcType=VARCHAR},
+			cargo_id=#{cargo_id, jdbcType=VARCHAR},
+			mnum=#{num},
+			operator=#{operator, jdbcType=VARCHAR},
+			store_id=#{store_id, jdbcType=VARCHAR}
+		</set>
+		<where> mid=#{mid} </where>
+	</update>
+	<!-- 根据货单更新货物 -->
+	<update id="updateCargo" parameterType="per.cr.entity.Manifest">
+		UPDATE cargo
+		<set>
+			<if test="num != null">cnum=cnum+#{num},</if>
+		</set>
+		<where> store_id=#{store_id} and cargo_id=#{cargo_id} </where>
+	</update>
+
+	<!-- 简单分页 -->
+	<select id="findByPage" parameterType="map" resultMap="manifestMap">
+		select *
+		from manifest limit #{start},#{end}
+	</select>
+
+	<!-- 入库和出库单分页 -->
+	<select id="findByTypePage" parameterType="map" resultMap="manifestMap">
+		select *
+		from manifest where type=#{type} limit #{start},#{end}
+	</select>
+</mapper>

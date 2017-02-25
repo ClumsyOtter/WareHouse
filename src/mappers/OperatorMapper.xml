@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="mappers.OperatorMapper">
+
+	<!-- 将项目中的字段与数据库中的字段搭桥梁 -->
+	<resultMap type="per.cr.entity.Operator" id="operatorMap">
+		<id property="oid" column="oid" />
+		<result property="name" column="oname" />
+		<result property="pwd" column="pwd" />
+		<result property="power" column="power" />
+		<result property="id" column="operator_id" />
+	</resultMap>
+
+	<!-- 增加 -->
+	<insert id="add" parameterType="per.cr.entity.Operator">
+		insert into operator
+		(oid,oname,pwd,power,operator_id)
+		values
+		(0,
+		#{name},#{pwd},#{power},#{id})
+	</insert>
+
+	<!-- 删除 -->
+	<delete id="deleteById" parameterType="int">
+		DELETE FROM operator
+		WHERE
+		oid=#{id}
+	</delete>
+
+	<!-- 查找 所有 -->
+	<select id="findAll" resultMap="operatorMap">
+		SELECT * FROM
+		operator
+	</select>
+
+	<!-- 通过id查找 -->
+	<select id="findById" parameterType="string" resultMap="operatorMap">
+		SELECT *
+		FROM operator WHERE oid = #{PID}
+	</select>
+
+	<select id="findByTid" parameterType="string" resultMap="operatorMap">
+		SELECT *
+		FROM operator WHERE operator_id = #{PID}
+	</select>
+
+	<select id="search" parameterType="hashmap" resultMap="operatorMap">
+		SELECT *
+		FROM
+		operator WHERE #{ftype} = #{fcontent}
+	</select>
+
+	<!-- 更新 -->
+	<update id="update" parameterType="per.cr.entity.Operator">
+		UPDATE operator
+		<set>
+			<if test="name != null">oname=#{name, jdbcType=VARCHAR},</if>
+			<if test="pwd != null">pwd=#{pwd, jdbcType=VARCHAR},</if>
+			<if test="power != null">power=#{power, jdbcType=VARCHAR},</if>
+			<if test="id != null">operator_id=#{id, jdbcType=VARCHAR},</if>
+		</set>
+		<where> operator_id=#{id} </where>
+	</update>
+
+	<!-- 分页 -->
+	<select id="findByPage" parameterType="map" resultMap="operatorMap">
+		select *
+		from operator limit #{start},#{end}
+	</select>
+</mapper>
